@@ -1,94 +1,123 @@
-# Obsidian Sample Plugin
 
-This is a sample plugin for Obsidian (https://obsidian.md).
+# 🧩 Obsidian API Bridge
 
-This project uses TypeScript to provide type checking and documentation.
-The repo depends on the latest plugin API (obsidian.d.ts) in TypeScript Definition format, which contains TSDoc comments describing what it does.
+![License: CC BY-NC 4.0](https://img.shields.io/badge/license-CC%20BY--NC%204.0-lightgrey)
 
-This sample plugin demonstrates some of the basic functionality the plugin API can do.
-- Adds a ribbon icon, which shows a Notice when clicked.
-- Adds a command "Open Sample Modal" which opens a Modal.
-- Adds a plugin setting tab to the settings page.
-- Registers a global click event and output 'click' to the console.
-- Registers a global interval which logs 'setInterval' to the console.
+A powerful Obsidian plugin that lets you define, test, and execute custom HTTP endpoints directly from your vault. Perfect for automating workflows, connecting to external APIs, and manipulating data from your notes.
 
-## First time developing plugins?
+✅ Works on both **desktop and mobile** (Obsidian Mobile App)
 
-Quick starting guide for new plugin devs:
+---
 
-- Check if [someone already developed a plugin for what you want](https://obsidian.md/plugins)! There might be an existing plugin similar enough that you can partner up with.
-- Make a copy of this repo as a template with the "Use this template" button (login to GitHub if you don't see it).
-- Clone your repo to a local development folder. For convenience, you can place this folder in your `.obsidian/plugins/your-plugin-name` folder.
-- Install NodeJS, then run `npm i` in the command line under your repo folder.
-- Run `npm run dev` to compile your plugin from `main.ts` to `main.js`.
-- Make changes to `main.ts` (or create new `.ts` files). Those changes should be automatically compiled into `main.js`.
-- Reload Obsidian to load the new version of your plugin.
-- Enable plugin in settings window.
-- For updates to the Obsidian API run `npm update` in the command line under your repo folder.
+## 🚀 Features
 
-## Releasing new releases
+- **Visual Endpoint Management:** Create, edit, delete, and test HTTP endpoints from the plugin settings.
+- **Variable & Token Support:** Use dynamic variables and reusable tokens in URLs, headers, and request bodies.
+- **Variable Interpolation:** Insert Obsidian or custom variables anywhere in your request.
+- **User Input Prompt:** If your endpoint contains `{{input}}`, the plugin will prompt you for a value before execution.
+- **Supports All HTTP Methods:** GET, POST, PUT, DELETE, PATCH.
+- **Flexible Response Handling:** Choose to display the response in a modal, copy it to the clipboard, or insert it into the active note.
+- **Import/Export Endpoints:** Easily backup or share your endpoint configuration as JSON.
+- **Execution Logging:** Automatically saves execution logs in the `.api-bridge-logs` folder.
+- **Quick Commands:** Run endpoints manually from the command palette or with a ribbon button.
 
-- Update your `manifest.json` with your new version number, such as `1.0.1`, and the minimum Obsidian version required for your latest release.
-- Update your `versions.json` file with `"new-plugin-version": "minimum-obsidian-version"` so older versions of Obsidian can download an older version of your plugin that's compatible.
-- Create new GitHub release using your new version number as the "Tag version". Use the exact version number, don't include a prefix `v`. See here for an example: https://github.com/obsidianmd/obsidian-sample-plugin/releases
-- Upload the files `manifest.json`, `main.js`, `styles.css` as binary attachments. Note: The manifest.json file must be in two places, first the root path of your repository and also in the release.
-- Publish the release.
+---
 
-> You can simplify the version bump process by running `npm version patch`, `npm version minor` or `npm version major` after updating `minAppVersion` manually in `manifest.json`.
-> The command will bump version in `manifest.json` and `package.json`, and add the entry for the new version to `versions.json`
+## 📦 Installation
 
-## Adding your plugin to the community plugin list
+1. Download and copy the plugin folder to `.obsidian/plugins/obsidian-api-bridge` inside your vault.
+2. Enable the plugin from Obsidian’s **Settings → Community Plugins**.
 
-- Check the [plugin guidelines](https://docs.obsidian.md/Plugins/Releasing/Plugin+guidelines).
-- Publish an initial version.
-- Make sure you have a `README.md` file in the root of your repo.
-- Make a pull request at https://github.com/obsidianmd/obsidian-releases to add your plugin.
+---
 
-## How to use
+## 🧠 Usage
 
-- Clone this repo.
-- Make sure your NodeJS is at least v16 (`node --version`).
-- `npm i` or `yarn` to install dependencies.
-- `npm run dev` to start compilation in watch mode.
+1. Open the plugin settings (Settings → API Bridge).
+2. Add, edit, or delete endpoints as needed.
+3. Use the **Test Endpoint** button to try out your configuration before saving.
+4. Run endpoints from:
+   - The command palette
+   - The ribbon icon
+   - (Coming soon) Slash commands in notes
+5. Check execution logs in the `.api-bridge-logs` folder.
 
-## Manually installing the plugin
+---
 
-- Copy over `main.js`, `styles.css`, `manifest.json` to your vault `VaultFolder/.obsidian/plugins/your-plugin-id/`.
+## 🧩 Variables & Tokens
 
-## Improve code quality with eslint (optional)
-- [ESLint](https://eslint.org/) is a tool that analyzes your code to quickly find problems. You can run ESLint against your plugin to find common bugs and ways to improve your code. 
-- To use eslint with this project, make sure to install eslint from terminal:
-  - `npm install -g eslint`
-- To use eslint to analyze this project use this command:
-  - `eslint main.ts`
-  - eslint will then create a report with suggestions for code improvement by file and line number.
-- If your source code is in a folder, such as `src`, you can use eslint with this command to analyze all files in that folder:
-  - `eslint .\src\`
+- Use `{{input}}` in the URL or body to prompt the user at execution time.
+- Use `{{title}}` to insert the active file title.
+- Define reusable tokens in the "Tokens" section and reference them with `{{tokenName}}`.
 
-## Funding URL
+---
 
-You can include funding URLs where people who use your plugin can financially support it.
+## 🔁 Import/Export
 
-The simple way is to set the `fundingUrl` field to your link in your `manifest.json` file:
+- Use the **Import Endpoints JSON** and **Export Endpoints JSON** buttons in the settings to share or backup your configuration.
+
+---
+
+## 🧪 Example Endpoint
 
 ```json
 {
-    "fundingUrl": "https://buymeacoffee.com"
+  "id": "my-endpoint",
+  "name": "My API",
+  "url": "https://api.example.com/data/{{input}}",
+  "method": "POST",
+  "headers": {
+    "Authorization": "Bearer {{token}}"
+  },
+  "bodyTemplate": {
+    "query": "{{input}}"
+  },
+  "insertResponseTo": "modal",
+  "trigger": ["manual"],
+  "requireConfirmation": false
 }
-```
+````
 
-If you have multiple URLs, you can also do:
+---
 
-```json
-{
-    "fundingUrl": {
-        "Buy Me a Coffee": "https://buymeacoffee.com",
-        "GitHub Sponsor": "https://github.com/sponsors",
-        "Patreon": "https://www.patreon.com/"
-    }
-}
-```
+## 🧭 Roadmap
 
-## API Documentation
+* [x] Prompt input support (`{{input}}`)
+* [x] UI testing of endpoints
+* [x] Import/export JSON config
+* [x] Execution logging to `.api-bridge-logs`
+* [ ] Slash commands or inline triggers in notes
+* [ ] Auto-run endpoints on file open/save
+* [ ] Quick panel to run endpoints visually
 
-See https://github.com/obsidianmd/obsidian-api
+---
+
+## 👤 Author
+
+**ModalesXD**
+🔗 [GitHub Profile](https://github.com/ModalesXD)
+📦 [Repository](https://github.com/MODALESXD/obsidian-api-bridge)
+
+---
+
+## 📄 License
+
+This project is licensed under the
+**Creative Commons Attribution-NonCommercial 4.0 International (CC BY-NC 4.0)**.
+
+You are free to:
+
+* ✅ Use, copy, and modify the code
+* ✅ Fork and build upon it
+* ❌ Not for commercial use
+
+### Requirements:
+
+* You **must credit** the original author:
+  **ModalesXD**
+  [Original repository](https://github.com/ModalesXD/obsidian-api-bridge)
+
+* If you make changes, you must **indicate** what was modified.
+
+See full license in [`LICENSE`](./LICENSE)
+or online: [https://creativecommons.org/licenses/by-nc/4.0/legalcode](https://creativecommons.org/licenses/by-nc/4.0/legalcode)
+ 

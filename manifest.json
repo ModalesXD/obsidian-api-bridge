@@ -1,11 +1,12 @@
 {
-	"id": "sample-plugin",
-	"name": "Sample Plugin",
+	"format_version": 1,
+	"header": "Obsidian API Bridge Manifest",
+	"id": "obsidian-api-bridge",
+	"name": "Api Bridge",
 	"version": "1.0.0",
 	"minAppVersion": "0.15.0",
-	"description": "Demonstrates some of the capabilities of the Obsidian API.",
-	"author": "Obsidian",
-	"authorUrl": "https://obsidian.md",
-	"fundingUrl": "https://obsidian.md/pricing",
+	"description": "Run and manage custom HTTP endpoints in Obsidian.",
+	"author": "ModalesXD",
+	"authorUrl": "https://github.com/ModalesXD",
 	"isDesktopOnly": false
 }

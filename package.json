@@ -1,15 +1,25 @@
 {
-	"name": "obsidian-sample-plugin",
+	"name": "obsidian-api-bridge",
 	"version": "1.0.0",
-	"description": "This is a sample plugin for Obsidian (https://obsidian.md)",
-	"main": "main.js",
+	"description": "Advanced Obsidian plugin to define, test, and execute custom HTTP endpoints directly from your vault.",
+	"main": "dist/main.js",
+	"types": "dist/main.d.ts",
 	"scripts": {
 		"dev": "node esbuild.config.mjs",
 		"build": "tsc -noEmit -skipLibCheck && node esbuild.config.mjs production",
-		"version": "node version-bump.mjs && git add manifest.json versions.json"
+		"version": "node version-bump.mjs && git add manifest.json versions.json",
+		"lint": "eslint src --ext .ts",
+		"typecheck": "tsc --noEmit"
 	},
-	"keywords": [],
-	"author": "",
+	"keywords": [
+		"obsidian",
+		"plugin",
+		"api",
+		"http",
+		"automation",
+		"integration"
+	],
+	"author": "ModalesXD <https://github.com/ModalesXD>",
 	"license": "MIT",
 	"devDependencies": {
 		"@types/node": "^16.11.6",
@@ -19,6 +29,14 @@
 		"esbuild": "0.17.3",
 		"obsidian": "latest",
 		"tslib": "2.4.0",
-		"typescript": "4.7.4"
+		"typescript": "4.7.4",
+		"eslint": "^8.18.0"
+	},
+	"engines": {
+		"node": ">=16.0.0"
+	},
+	"repository": {
+		"type": "git",
+		"url": "https://github.com/ModalesXD/obsidian-api-bridge.git"
 	}
 }
