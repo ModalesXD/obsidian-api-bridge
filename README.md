@@ -1,123 +1,201 @@
 
-# 🧩 Obsidian API Bridge
+# Obsidian API Bridge Plugin
 
-![License: CC BY-NC 4.0](https://img.shields.io/badge/license-CC%20BY--NC%204.0-lightgrey)
+Un plugin para Obsidian que permite ejecutar endpoints de API directamente desde la aplicación, con validación robusta y una arquitectura modular.
 
-A powerful Obsidian plugin that lets you define, test, and execute custom HTTP endpoints directly from your vault. Perfect for automating workflows, connecting to external APIs, and manipulating data from your notes.
+## 🏗️ Arquitectura
 
-✅ Works on both **desktop and mobile** (Obsidian Mobile App)
+El plugin está estructurado siguiendo principios de separación de responsabilidades y modularidad:
 
----
+### 📁 Estructura de Directorios
 
-## 🚀 Features
+```
+src/
+├── constants/           # Constantes y configuraciones centralizadas
+├── core/               # Lógica de negocio central
+│   ├── api/           # Funcionalidades relacionadas con APIs
+│   ├── endpoint/      # Lógica específica de endpoints
+│   ├── input-handler.ts
+│   └── logger.ts
+├── services/          # Servicios de alto nivel
+│   ├── EndpointService.ts    # Gestión de endpoints
+│   ├── CommandService.ts     # Gestión de comandos
+│   └── EventService.ts       # Gestión de eventos
+├── types/             # Definiciones de tipos TypeScript
+├── ui/                # Componentes de interfaz de usuario
+├── utils/             # Utilidades y helpers
+└── main.ts           # Punto de entrada del plugin
+```
 
-- **Visual Endpoint Management:** Create, edit, delete, and test HTTP endpoints from the plugin settings.
-- **Variable & Token Support:** Use dynamic variables and reusable tokens in URLs, headers, and request bodies.
-- **Variable Interpolation:** Insert Obsidian or custom variables anywhere in your request.
-- **User Input Prompt:** If your endpoint contains `{{input}}`, the plugin will prompt you for a value before execution.
-- **Supports All HTTP Methods:** GET, POST, PUT, DELETE, PATCH.
-- **Flexible Response Handling:** Choose to display the response in a modal, copy it to the clipboard, or insert it into the active note.
-- **Import/Export Endpoints:** Easily backup or share your endpoint configuration as JSON.
-- **Execution Logging:** Automatically saves execution logs in the `.api-bridge-logs` folder.
-- **Quick Commands:** Run endpoints manually from the command palette or with a ribbon button.
+### 🔧 Servicios Principales
 
----
+#### EndpointService
+- **Responsabilidad**: Gestión completa de endpoints (CRUD, validación, ejecución)
+- **Características**:
+  - Validación robusta de endpoints
+  - Ejecución segura de peticiones HTTP
+  - Manejo de errores centralizado
+  - Almacenamiento persistente
 
-## 📦 Installation
+#### CommandService
+- **Responsabilidad**: Gestión de comandos de Obsidian
+- **Características**:
+  - Registro dinámico de comandos
+  - Limpieza automática de comandos obsoletos
+  - Integración con el sistema de comandos de Obsidian
 
-1. Download and copy the plugin folder to `.obsidian/plugins/obsidian-api-bridge` inside your vault.
-2. Enable the plugin from Obsidian’s **Settings → Community Plugins**.
+#### EventService
+- **Responsabilidad**: Manejo de eventos y triggers automáticos
+- **Características**:
+  - Triggers basados en eventos de Obsidian
+  - Ejecución automática de endpoints
+  - Manejo de contextos específicos
 
----
+### 🛡️ Validación de Endpoints
 
-## 🧠 Usage
+El sistema incluye validación completa de endpoints:
 
-1. Open the plugin settings (Settings → API Bridge).
-2. Add, edit, or delete endpoints as needed.
-3. Use the **Test Endpoint** button to try out your configuration before saving.
-4. Run endpoints from:
-   - The command palette
-   - The ribbon icon
-   - (Coming soon) Slash commands in notes
-5. Check execution logs in the `.api-bridge-logs` folder.
+```typescript
+// Ejemplo de validación
+const validator = new EndpointValidator();
+const result = validator.validate(endpoint);
 
----
+if (!result.isValid) {
+    console.log("Errores:", result.errors);
+}
+```
 
-## 🧩 Variables & Tokens
+**Campos validados**:
+- ✅ ID único y formato válido
+- ✅ URL válida
+- ✅ Método HTTP soportado
+- ✅ Headers válidos
+- ✅ Body template (JSON válido)
+- ✅ Trigger types válidos
+- ✅ Insert actions válidos
 
-- Use `{{input}}` in the URL or body to prompt the user at execution time.
-- Use `{{title}}` to insert the active file title.
-- Define reusable tokens in the "Tokens" section and reference them with `{{tokenName}}`.
+### 🎯 Separación de Lógica y UI
 
----
+La arquitectura separa claramente la lógica de negocio de la interfaz de usuario:
 
-## 🔁 Import/Export
+- **Lógica de Negocio**: En `services/` y `core/`
+- **Interfaz de Usuario**: En `ui/`
+- **Comunicación**: A través de interfaces bien definidas
 
-- Use the **Import Endpoints JSON** and **Export Endpoints JSON** buttons in the settings to share or backup your configuration.
+## 🚀 Características
 
----
+### ✨ Funcionalidades Principales
 
-## 🧪 Example Endpoint
+1. **Gestión de Endpoints**
+   - Crear, editar, eliminar endpoints
+   - Validación automática
+   - Importar/exportar configuraciones
+
+2. **Ejecución de APIs**
+   - Múltiples métodos HTTP
+   - Headers personalizables
+   - Body templates dinámicos
+   - Manejo de respuestas flexible
+
+3. **Triggers Automáticos**
+   - Manual (comandos)
+   - Al abrir notas
+   - Al guardar notas
+   - Al seleccionar texto
+
+4. **Manejo de Respuestas**
+   - Modal de notificación
+   - Copiar al portapapeles
+   - Insertar en nota activa
+   - Crear nueva nota
+   - Toast notifications
+
+### 🔒 Seguridad y Validación
+
+- Validación completa de URLs
+- Sanitización de headers
+- Validación de JSON
+- Manejo seguro de tokens
+- Timeouts configurables
+
+### 📊 Logging y Monitoreo
+
+- Logs de ejecución detallados
+- Manejo de errores centralizado
+- Notificaciones informativas
+- Debugging mejorado
+
+## 🛠️ Desarrollo
+
+### Requisitos
+
+- Node.js 16+
+- TypeScript
+- Obsidian API
+
+### Instalación
+
+```bash
+npm install
+```
+
+### Compilación
+
+```bash
+npm run build
+```
+
+### Desarrollo
+
+```bash
+npm run dev
+```
+
+## 📝 Uso
+
+### Configuración Básica
+
+1. Activar el plugin en Obsidian
+2. Ir a Configuración > API Bridge
+3. Crear un nuevo endpoint
+4. Configurar URL, método y headers
+5. Guardar y probar
+
+### Ejemplo de Endpoint
 
 ```json
 {
-  "id": "my-endpoint",
-  "name": "My API",
-  "url": "https://api.example.com/data/{{input}}",
-  "method": "POST",
+  "id": "weather-api",
+  "name": "Weather API",
+  "url": "https://api.weatherapi.com/v1/current.json?key={{apiKey}}&q={{city}}",
+  "method": "GET",
   "headers": {
-    "Authorization": "Bearer {{token}}"
+    "Accept": "application/json"
   },
-  "bodyTemplate": {
-    "query": "{{input}}"
-  },
-  "insertResponseTo": "modal",
   "trigger": ["manual"],
-  "requireConfirmation": false
+  "insertResponseTo": "modal"
 }
-````
+```
 
----
+## 🤝 Contribución
 
-## 🧭 Roadmap
+1. Fork el repositorio
+2. Crear una rama para tu feature
+3. Implementar cambios siguiendo la arquitectura existente
+4. Agregar tests si es necesario
+5. Crear un Pull Request
 
-* [x] Prompt input support (`{{input}}`)
-* [x] UI testing of endpoints
-* [x] Import/export JSON config
-* [x] Execution logging to `.api-bridge-logs`
-* [ ] Slash commands or inline triggers in notes
-* [ ] Auto-run endpoints on file open/save
-* [ ] Quick panel to run endpoints visually
+## 📄 Licencia
 
----
+MIT License - ver [LICENSE](LICENSE) para más detalles.
 
-## 👤 Author
+## 🔄 Changelog
 
-**ModalesXD**
-🔗 [GitHub Profile](https://github.com/ModalesXD)
-📦 [Repository](https://github.com/MODALESXD/obsidian-api-bridge)
-
----
-
-## 📄 License
-
-This project is licensed under the
-**Creative Commons Attribution-NonCommercial 4.0 International (CC BY-NC 4.0)**.
-
-You are free to:
-
-* ✅ Use, copy, and modify the code
-* ✅ Fork and build upon it
-* ❌ Not for commercial use
-
-### Requirements:
-
-* You **must credit** the original author:
-  **ModalesXD**
-  [Original repository](https://github.com/ModalesXD/obsidian-api-bridge)
-
-* If you make changes, you must **indicate** what was modified.
-
-See full license in [`LICENSE`](./LICENSE)
-or online: [https://creativecommons.org/licenses/by-nc/4.0/legalcode](https://creativecommons.org/licenses/by-nc/4.0/legalcode)
+### v1.0.0
+- ✅ Restructuración completa del código
+- ✅ Separación de lógica y UI
+- ✅ Validación robusta de endpoints
+- ✅ Arquitectura modular con servicios
+- ✅ Manejo de errores mejorado
+- ✅ Sistema de notificaciones centralizado
  

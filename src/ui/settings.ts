@@ -1,6 +1,6 @@
 import { PluginSettingTab, App, Setting, Modal, Notice } from "obsidian";
-import { type PluginSettings, type ApiEndpoint, InsertAction, TriggerType } from "./types";
-import type APIBridgePlugin from "./main";
+import { type PluginSettings, type ApiEndpoint, InsertAction, TriggerType, HttpMethod } from "../types";
+import type APIBridgePlugin from "../main";
 import { EndpointEditorModal } from "./endpointEditor";
 
 export const DEFAULT_SETTINGS: PluginSettings = {
@@ -24,12 +24,13 @@ export class APIBridgeSettingTab extends PluginSettingTab {
 			text: "API Bridge – Endpoint Settings",
 		});
 
+		const endpointService = this.plugin.getEndpointService();
+		const endpoints = endpointService.getAllEndpoints();
+
 		new Setting(containerEl)
 			.setName("Configured endpoints")
 			.setDesc(
-				"You currently have " +
-					this.plugin.settings.endpoints.length +
-					" endpoint(s)."
+				"You currently have " + endpoints.length + " endpoint(s)."
 			)
 			.addButton((btn) => {
 				btn.setButtonText("View/Edit")
@@ -40,21 +41,34 @@ export class APIBridgeSettingTab extends PluginSettingTab {
 			});
 
 		// Token management section
+		this.displayTokenSection(containerEl);
+
+		// Import/Export section
+		this.displayImportExportSection(containerEl);
+	}
+
+	private displayTokenSection(containerEl: HTMLElement): void {
 		containerEl.createEl("h3", { text: "Tokens" });
 		containerEl.createEl("div", { text: "Tokens can be referenced in endpoints as {{tokenName}}." });
 
-		Object.entries(this.plugin.settings.tokens).forEach(([key, value]) => {
+		const endpointService = this.plugin.getEndpointService();
+		const tokens = endpointService.getTokens();
+
+		Object.entries(tokens).forEach(([key, value]) => {
 			new Setting(containerEl)
 				.setName(key)
 				.addText((text) =>
 					text.setValue(value).onChange(async (val) => {
-						this.plugin.settings.tokens[key] = val;
+						const updatedTokens = { ...tokens, [key]: val };
+						await endpointService.updateTokens(updatedTokens);
 						await this.plugin.saveSettings();
 					})
 				)
 				.addExtraButton((btn) => {
 					btn.setIcon("trash").setTooltip("Delete token").onClick(async () => {
-						delete this.plugin.settings.tokens[key];
+						const updatedTokens = { ...tokens };
+						delete updatedTokens[key];
+						await endpointService.updateTokens(updatedTokens);
 						await this.plugin.saveSettings();
 						this.display();
 					});
@@ -76,13 +90,16 @@ export class APIBridgeSettingTab extends PluginSettingTab {
 					const name = (nameInput[nameInput.length-1] as HTMLInputElement)?.value.trim();
 					const value = (valueInput[valueInput.length-1] as HTMLInputElement)?.value;
 					if (name) {
-						this.plugin.settings.tokens[name] = value;
+						const updatedTokens = { ...tokens, [name]: value };
+						await endpointService.updateTokens(updatedTokens);
 						await this.plugin.saveSettings();
 						this.display();
 					}
 				});
 			});
+	}
 
+	private displayImportExportSection(containerEl: HTMLElement): void {
 		new Setting(containerEl).addButton((btn) => {
 			btn.setButtonText("Import Endpoints JSON").onClick(() => {
 				new ImportModal(this.app, this.plugin).open();
@@ -91,11 +108,8 @@ export class APIBridgeSettingTab extends PluginSettingTab {
 
 		new Setting(containerEl).addButton((btn) => {
 			btn.setButtonText("Export Endpoints JSON").onClick(() => {
-				const json = JSON.stringify(
-					this.plugin.settings.endpoints,
-					null,
-					2
-				);
+				const endpointService = this.plugin.getEndpointService();
+				const json = JSON.stringify(endpointService.exportEndpoints(), null, 2);
 				navigator.clipboard.writeText(json);
 				new Notice("Endpoints copied to clipboard");
 			});
@@ -105,19 +119,26 @@ export class APIBridgeSettingTab extends PluginSettingTab {
 	showEndpointList(containerEl: HTMLElement) {
 		containerEl.empty();
 
-		this.plugin.settings.endpoints.forEach((endpoint, index) => {
+		const endpointService = this.plugin.getEndpointService();
+		const endpoints = endpointService.getAllEndpoints();
+
+		endpoints.forEach((endpoint, index) => {
 			new Setting(containerEl)
 				.setName(endpoint.name)
 				.setDesc(endpoint.url)
 				.addButton((btn) => {
-					btn.setButtonText("Edit").onClick(() => {
+					btn.setButtonText("Edit").onClick(async () => {
 						new EndpointEditorModal(
 							this.app,
 							endpoint,
-							(updated) => {
-								this.plugin.settings.endpoints[index] = updated;
-								this.plugin.saveSettings();
-								this.display();
+							async (updated) => {
+								const result = await endpointService.updateEndpoint(endpoint.id, updated);
+								if (result.success) {
+									await this.plugin.saveSettings();
+									this.display();
+								} else {
+									new Notice(`Error updating endpoint: ${result.error}`);
+								}
 							}
 						).open();
 					});
@@ -125,10 +146,14 @@ export class APIBridgeSettingTab extends PluginSettingTab {
 				.addExtraButton((btn) => {
 					btn.setIcon("trash")
 						.setTooltip("Delete")
-						.onClick(() => {
-							this.plugin.settings.endpoints.splice(index, 1);
-							this.plugin.saveSettings();
-							this.display();
+						.onClick(async () => {
+							const result = await endpointService.deleteEndpoint(endpoint.id);
+							if (result.success) {
+								await this.plugin.saveSettings();
+								this.display();
+							} else {
+								new Notice(`Error deleting endpoint: ${result.error}`);
+							}
 						});
 				});
 		});
@@ -136,22 +161,26 @@ export class APIBridgeSettingTab extends PluginSettingTab {
 		new Setting(containerEl).addButton((btn) => {
 			btn.setButtonText("➕ New Endpoint")
 				.setCta()
-				.onClick(() => {
+				.onClick(async () => {
 					const nuevo: ApiEndpoint = {
 						id: "",
 						name: "",
 						url: "",
-						method: "POST",
+						method: HttpMethod.GET,
 						headers: {},
-						bodyTemplate: {},
+						bodyTemplate: undefined,
 						insertResponseTo: InsertAction.Modal,
 						trigger: [TriggerType.Manual],
 						requireConfirmation: false,
 					};
-					new EndpointEditorModal(this.app, nuevo, (created) => {
-						this.plugin.settings.endpoints.push(created);
-						this.plugin.saveSettings();
-						this.display();
+					new EndpointEditorModal(this.app, nuevo, async (created) => {
+						const result = await endpointService.createEndpoint(created);
+						if (result.success) {
+							await this.plugin.saveSettings();
+							this.display();
+						} else {
+							new Notice(`Error creating endpoint: ${result.error}`);
+						}
 					}).open();
 				});
 		});
@@ -179,14 +208,20 @@ class ImportModal extends Modal {
 		new Setting(contentEl).addButton((btn) => {
 			btn.setButtonText("Import")
 				.setCta()
-				.onClick(() => {
+				.onClick(async () => {
 					try {
 						const data = JSON.parse(this.textarea.value);
 						if (Array.isArray(data)) {
-							this.plugin.settings.endpoints = data;
-							this.plugin.saveSettings();
-							new Notice("Import successful");
-							this.close();
+							const endpointService = this.plugin.getEndpointService();
+							const result = await endpointService.importEndpoints(data);
+							if (result.success) {
+								await this.plugin.saveSettings();
+								new Notice("Import successful");
+								this.close();
+							} else {
+								new Notice(`Import completed with errors: ${result.errors.join(", ")}`);
+								this.close();
+							}
 						} else {
 							new Notice("JSON is not an array");
 						}

@@ -6,7 +6,7 @@ import {
 	ButtonComponent,
 	Notice,
 } from "obsidian";
-import type { ApiEndpoint, HttpMethod } from "./types";
+import { ApiEndpoint, HttpMethod } from "../types";
 
 export class EndpointEditorModal extends Modal {
 	endpoint: ApiEndpoint;
@@ -54,11 +54,11 @@ export class EndpointEditorModal extends Modal {
 
 		new Setting(contentEl).setName("HTTP Method").addDropdown((drop) => {
 			const methods: HttpMethod[] = [
-				"GET",
-				"POST",
-				"PUT",
-				"DELETE",
-				"PATCH",
+				HttpMethod.GET,
+				HttpMethod.POST,
+				HttpMethod.PUT,
+				HttpMethod.DELETE,
+				HttpMethod.PATCH,
 			];
 			methods.forEach((m) => drop.addOption(m, m));
 			drop.setValue(this.endpoint.method);
@@ -92,7 +92,8 @@ export class EndpointEditorModal extends Modal {
 					try {
 						this.endpoint.bodyTemplate = JSON.parse(val);
 					} catch (e) {
-						this.endpoint.bodyTemplate = val;
+						// Si no es JSON válido, no asignar nada
+						console.warn("Invalid JSON for body template");
 					}
 				});
 			});
