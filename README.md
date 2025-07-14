@@ -1,167 +1,195 @@
-
 # Obsidian API Bridge Plugin
 
-Un plugin para Obsidian que permite ejecutar endpoints de API directamente desde la aplicación, con validación robusta y una arquitectura modular.
+A plugin for Obsidian that allows you to execute API endpoints directly from the app, with robust validation and a modular architecture.
 
-## 🏗️ Arquitectura
+---
 
-El plugin está estructurado siguiendo principios de separación de responsabilidades y modularidad:
+## 🏗️ Architecture
 
-### 📁 Estructura de Directorios
+The plugin is structured following principles of separation of concerns and modularity:
+
+### 📁 Directory Structure
 
 ```
 src/
-├── constants/           # Constantes y configuraciones centralizadas
-├── core/               # Lógica de negocio central
-│   ├── api/           # Funcionalidades relacionadas con APIs
-│   ├── endpoint/      # Lógica específica de endpoints
+├── constants/           # Centralized constants and configurations
+├── core/               # Core business logic
+│   ├── api/           # API-related logic
+│   ├── endpoint/      # Endpoint-specific logic
 │   ├── input-handler.ts
 │   └── logger.ts
-├── services/          # Servicios de alto nivel
-│   ├── EndpointService.ts    # Gestión de endpoints
-│   ├── CommandService.ts     # Gestión de comandos
-│   └── EventService.ts       # Gestión de eventos
-├── types/             # Definiciones de tipos TypeScript
-├── ui/                # Componentes de interfaz de usuario
-├── utils/             # Utilidades y helpers
-└── main.ts           # Punto de entrada del plugin
+├── services/          # High-level services
+│   ├── EndpointService.ts    # Endpoint management
+│   ├── CommandService.ts     # Obsidian command management
+│   └── EventService.ts       # Trigger and event handling
+├── types/             # TypeScript definitions
+├── ui/                # User interface components
+├── utils/             # Helpers and utilities
+└── main.ts           # Plugin entry point
 ```
 
-### 🔧 Servicios Principales
+---
+
+### 🔧 Core Services
 
 #### EndpointService
-- **Responsabilidad**: Gestión completa de endpoints (CRUD, validación, ejecución)
-- **Características**:
-  - Validación robusta de endpoints
-  - Ejecución segura de peticiones HTTP
-  - Manejo de errores centralizado
-  - Almacenamiento persistente
+
+* **Responsibility**: Full lifecycle management of endpoints (CRUD, validation, execution)
+* **Features**:
+
+  * Strong endpoint validation
+  * Safe execution of HTTP requests
+  * Centralized error handling
+  * Persistent storage
 
 #### CommandService
-- **Responsabilidad**: Gestión de comandos de Obsidian
-- **Características**:
-  - Registro dinámico de comandos
-  - Limpieza automática de comandos obsoletos
-  - Integración con el sistema de comandos de Obsidian
+
+* **Responsibility**: Managing plugin commands in Obsidian
+* **Features**:
+
+  * Dynamic registration of commands
+  * Automatic cleanup of obsolete commands
+  * Integration with Obsidian’s command system
 
 #### EventService
-- **Responsabilidad**: Manejo de eventos y triggers automáticos
-- **Características**:
-  - Triggers basados en eventos de Obsidian
-  - Ejecución automática de endpoints
-  - Manejo de contextos específicos
 
-### 🛡️ Validación de Endpoints
+* **Responsibility**: Automatic triggers and event handling
+* **Features**:
 
-El sistema incluye validación completa de endpoints:
+  * Event-based execution (on note open/save/select)
+  * Automatic endpoint execution
+  * Context-aware behavior
 
-```typescript
-// Ejemplo de validación
+---
+
+### 🛡️ Endpoint Validation
+
+The plugin includes a robust validation system for each endpoint:
+
+```ts
+// Example
 const validator = new EndpointValidator();
 const result = validator.validate(endpoint);
 
 if (!result.isValid) {
-    console.log("Errores:", result.errors);
+	console.log("Errors:", result.errors);
 }
 ```
 
-**Campos validados**:
-- ✅ ID único y formato válido
-- ✅ URL válida
-- ✅ Método HTTP soportado
-- ✅ Headers válidos
-- ✅ Body template (JSON válido)
-- ✅ Trigger types válidos
-- ✅ Insert actions válidos
+**Validated Fields:**
 
-### 🎯 Separación de Lógica y UI
+* ✅ Unique ID and proper format
+* ✅ Valid URL
+* ✅ Supported HTTP method
+* ✅ Valid headers
+* ✅ JSON-valid body template
+* ✅ Valid trigger types
+* ✅ Valid insert actions
 
-La arquitectura separa claramente la lógica de negocio de la interfaz de usuario:
+---
 
-- **Lógica de Negocio**: En `services/` y `core/`
-- **Interfaz de Usuario**: En `ui/`
-- **Comunicación**: A través de interfaces bien definidas
+### 🎯 Logic/UI Separation
 
-## 🚀 Características
+Architecture ensures clear separation between business logic and UI:
 
-### ✨ Funcionalidades Principales
+* **Business Logic**: In `services/` and `core/`
+* **User Interface**: In `ui/`
+* **Communication**: Via well-defined interfaces
 
-1. **Gestión de Endpoints**
-   - Crear, editar, eliminar endpoints
-   - Validación automática
-   - Importar/exportar configuraciones
+---
 
-2. **Ejecución de APIs**
-   - Múltiples métodos HTTP
-   - Headers personalizables
-   - Body templates dinámicos
-   - Manejo de respuestas flexible
+## 🚀 Features
 
-3. **Triggers Automáticos**
-   - Manual (comandos)
-   - Al abrir notas
-   - Al guardar notas
-   - Al seleccionar texto
+### ✨ Core Functionality
 
-4. **Manejo de Respuestas**
-   - Modal de notificación
-   - Copiar al portapapeles
-   - Insertar en nota activa
-   - Crear nueva nota
-   - Toast notifications
+1. **Endpoint Management**
 
-### 🔒 Seguridad y Validación
+   * Create, edit, and delete endpoints
+   * Auto-validation
+   * Import/export configurations
 
-- Validación completa de URLs
-- Sanitización de headers
-- Validación de JSON
-- Manejo seguro de tokens
-- Timeouts configurables
+2. **API Execution**
 
-### 📊 Logging y Monitoreo
+   * Supports multiple HTTP methods
+   * Customizable headers
+   * Dynamic body templates
+   * Flexible response handling
 
-- Logs de ejecución detallados
-- Manejo de errores centralizado
-- Notificaciones informativas
-- Debugging mejorado
+3. **Automatic Triggers**
 
-## 🛠️ Desarrollo
+   * Manual (via command)
+   * On note open
+   * On note save
+   * On text selection
 
-### Requisitos
+4. **Response Handling**
 
-- Node.js 16+
-- TypeScript
-- Obsidian API
+   * Display in modal
+   * Copy to clipboard
+   * Insert into active note
+   * Create new note
+   * Toast notification
 
-### Instalación
+---
+
+### 🔒 Security & Validation
+
+* Complete URL validation
+* Header sanitization
+* JSON body validation
+* Token safety and injection
+* Configurable timeouts
+
+---
+
+### 📊 Logging & Monitoring
+
+* Detailed execution logs
+* Centralized error handling
+* Informative notices
+* Enhanced debugging support
+
+---
+
+## 🛠️ Development
+
+### Requirements
+
+* Node.js 16+
+* TypeScript
+* Obsidian API
+
+### Installation
 
 ```bash
 npm install
 ```
 
-### Compilación
+### Build
 
 ```bash
 npm run build
 ```
 
-### Desarrollo
+### Development Mode
 
 ```bash
 npm run dev
 ```
 
-## 📝 Uso
+---
 
-### Configuración Básica
+## 📝 Usage
 
-1. Activar el plugin en Obsidian
-2. Ir a Configuración > API Bridge
-3. Crear un nuevo endpoint
-4. Configurar URL, método y headers
-5. Guardar y probar
+### Basic Configuration
 
-### Ejemplo de Endpoint
+1. Enable the plugin in Obsidian
+2. Go to Settings → API Bridge
+3. Create a new endpoint
+4. Set URL, method, headers, etc.
+5. Save and test it
+
+### Example Endpoint
 
 ```json
 {
@@ -177,25 +205,31 @@ npm run dev
 }
 ```
 
-## 🤝 Contribución
+---
 
-1. Fork el repositorio
-2. Crear una rama para tu feature
-3. Implementar cambios siguiendo la arquitectura existente
-4. Agregar tests si es necesario
-5. Crear un Pull Request
+## 🤝 Contributing
 
-## 📄 Licencia
+1. Fork the repository
+2. Create a branch for your feature
+3. Implement your changes following the current architecture
+4. Add tests if applicable
+5. Submit a Pull Request
 
-MIT License - ver [LICENSE](LICENSE) para más detalles.
+---
+
+## 📄 License
+
+MIT License – see [LICENSE](LICENSE) for details.
+
+---
 
 ## 🔄 Changelog
 
 ### v1.0.0
-- ✅ Restructuración completa del código
-- ✅ Separación de lógica y UI
-- ✅ Validación robusta de endpoints
-- ✅ Arquitectura modular con servicios
-- ✅ Manejo de errores mejorado
-- ✅ Sistema de notificaciones centralizado
- 
+
+* ✅ Complete code restructuring
+* ✅ Separation of logic and UI
+* ✅ Robust endpoint validation
+* ✅ Modular architecture with services
+* ✅ Improved error handling
+* ✅ Centralized notification system
